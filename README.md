@@ -33,7 +33,7 @@ server and client file on Linux
 >![1](https://user-images.githubusercontent.com/82483513/119313341-659c3700-bcae-11eb-9b4c-a2c0c4e9b119.png)
 >서버 코드에서 3명분의 아이디와 패스워드를 정의하였고 P2P파일전송시 사용할 매크로 변수를 선언하였다. 11~18라인의 구조체는 로그인시 user의 아이피 및 정보를 각각의 구조체에 입력시킬 수 있도록 선언하였다.
 소켓번호가 저장될 client변수는 main함수 의외에서도 사용이 용이하게 전역변수로 선언해주었다.  
->SEND_IP()는 후술.
+>SEND_IP()는 후술.  
 >![1](https://user-images.githubusercontent.com/82483513/119313410-7a78ca80-bcae-11eb-881c-fb835f0c63c6.png)
 >뒤에서 select()함수를 사용하기 위해 구조체 fd_set을 선언하였다.  
 >Project#2와 바뀐점으로는 63라인에 클라이언트의 아이피를 문자열의 형태로 임시로 저장할 포인터 변수를 선언하였고 70라인의 로그인의 실패여부를 알려주는 변수를 선언하였다.
