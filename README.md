@@ -2,7 +2,7 @@
 server and client file on Linux
 
 ## 1. 구현 목표
->![1](https://user-images.githubusercontent.com/82483513/119311982-ba3eb280-bcac-11eb-9413-cc7c8d733099.jpg)
+>![1](https://user-images.githubusercontent.com/82483513/119311982-ba3eb280-bcac-11eb-9413-cc7c8d733099.jpg)  
 
 ## 2. 설계 조건
 >1. User1과 User2는 서버에 접속할 때, 로그인을 성공하면 자신의 P2P IP주소/Port번호 정보를 서버로 전송해준다.  
@@ -26,23 +26,44 @@ server and client file on Linux
 >3. 이를 위하여 서버에서 유저 구조체를 만들어 각각의 유저정보를 입력할때 소켓번호도 저장하였다. 이후 세명의 유저가 파일요청을 할수있는 모든 경우의 수에 대하여 조건문을 걸어서 각각 저장된 소켓번호를 사용하여 통신 할 수 있도록 하였다.  
 
 ## 5. Flow Chart
->![1](https://user-images.githubusercontent.com/82483513/119313038-0807ea80-bcae-11eb-9291-bae6fc3388ed.png)
+>![1](https://user-images.githubusercontent.com/82483513/119313038-0807ea80-bcae-11eb-9291-bae6fc3388ed.png)  
 >파일요청 메세지를 입력한쪽이 서버가되고 수신받은쪽이 클라이언트가된다. 수신 받은쪽은 요청한 클라이언트의 아이피주소를 받아 서버가 된쪽에 connect()를 한다. 이후 파일전송 프로세스를 진행할 수 있다.  
 
 ## 6. server.c 코드 설명
->![1](https://user-images.githubusercontent.com/82483513/119313341-659c3700-bcae-11eb-9b4c-a2c0c4e9b119.png)
+>![1](https://user-images.githubusercontent.com/82483513/119313341-659c3700-bcae-11eb-9b4c-a2c0c4e9b119.png)  
 >서버 코드에서 3명분의 아이디와 패스워드를 정의하였고 P2P파일전송시 사용할 매크로 변수를 선언하였다. 11~18라인의 구조체는 로그인시 user의 아이피 및 정보를 각각의 구조체에 입력시킬 수 있도록 선언하였다.
 소켓번호가 저장될 client변수는 main함수 의외에서도 사용이 용이하게 전역변수로 선언해주었다.  
 >SEND_IP()는 후술.  
->![1](https://user-images.githubusercontent.com/82483513/119313410-7a78ca80-bcae-11eb-881c-fb835f0c63c6.png)
+>![1](https://user-images.githubusercontent.com/82483513/119313410-7a78ca80-bcae-11eb-881c-fb835f0c63c6.png)  
 >뒤에서 select()함수를 사용하기 위해 구조체 fd_set을 선언하였다.  
 >Project#2와 바뀐점으로는 63라인에 클라이언트의 아이피를 문자열의 형태로 임시로 저장할 포인터 변수를 선언하였고 70라인의 로그인의 실패여부를 알려주는 변수를 선언하였다.
 여기서 login_fail_flag의 값이 1이되면 로그인에 실패하였다는 의미이다.  
->![1](https://user-images.githubusercontent.com/82483513/119313629-bca20c00-bcae-11eb-90a9-a83ea8319cc1.png)
->![2](https://user-images.githubusercontent.com/82483513/119313650-c3308380-bcae-11eb-8f0e-baaa9be2ae77.png)
->모든 문자열을 recv받을때에는 받은 문자열의 끝에 '\0'을 추가해줌으로써 출력이 정상적으로 되게 한다.  
+>![1](https://user-images.githubusercontent.com/82483513/119313629-bca20c00-bcae-11eb-90a9-a83ea8319cc1.png)  
+>![2](https://user-images.githubusercontent.com/82483513/119313650-c3308380-bcae-11eb-8f0e-baaa9be2ae77.png)  
+>Listen() 단계가 끝나면 nfdps = sockfd +1 을 해준다. nfdps는 select()함수의 필요 인자 중 하나로 최대 소켓번호 +1을 의미한다.  
+>While(1) 문에 들어간 뒤, nfdps의 값을 갱신해준다. 이를 갱신하지 않을 경우 오류가 발생한다. FD_SET을 이용하여 입출력 변화를 감지할 소켓을 지정한다.  
+>Select()함수를 호출한다. 만약 값이 -1이면 에러이다. 이제 어떤 입력이 발생했는지 판단하기 위하여 FD_ISSET을 사용한다. 초기 소켓인 sockfd에서 입력이 발생하면 클라이언트 즉, 유저의 접속을 허용하고 new_fd를 만든다. 만일 new_fd 의 값이 -1 일 경우, accept 단계에서 에러가 발생했다.  
+>![1](https://user-images.githubusercontent.com/82483513/119318475-53bd9280-bcb4-11eb-8494-167b2ee7ad74.png)  
+>클라이언트의 소켓 번호를 위에서 생성한 client에 저장한다. 그 후, recv함수를 이용하여 변수 id와 pw에 각각 클라이언트 측에서 보낸 id와 pw를 저장한다. 이때 ‘\0’ (널 문자)를 사용하지 않을 경우 id와 pw 부분에 쓰레기 값들이 들어가 자동적으로 로그인 실패 처리가 된다.	
+>이제, strcmp 함수를 이용하여 아이디와 비밀번호가 일치하는지 확인한다. 
+>일치하면 로그인 성공 메시지를 클라이언트에게 전송하고 로그인 성공메세지를 채팅룸화면에 띄우고 해당 유저의 소켓정보와 ip정보를 각각 구조체에 저장시킨다. 또한 서버에서 어떤 IP주소에서 접속을 하였고 현재 접속중인 클라이언트를 확인할 수 있다.
+>![1](https://user-images.githubusercontent.com/82483513/119318954-d9d9d900-bcb4-11eb-86b7-662c8f2fc7e6.png)  
+>Project#2에서 클라이언트에게 메세지를 보내는 방식을 조금 수정하였다.
+먼저 SEND_IP()함수가 1을 Return하면 P2P IP주소를 보내는 과정을 수행하고 0을 return하면 그대로 자신을 제외한 접속한 유저들에게 메세지를 보낸다.
+>![1](https://user-images.githubusercontent.com/82483513/119319079-fa099800-bcb4-11eb-830c-12aebedc070f.png)  
+>클라이언트에서 받은 메세지인 buf를 인자로 가져온다.
+이후 이 인자를 strstr()을 이용하여 처음에 정의된 모든 매크로변수와 비교하여 어떤 유저가 어떤 유저에게 파일을 요청하는지 확인한다. 확인이 되면 파일을 요청받는 유저에게 “[FILE]”메세지와 파일을 요청하는 유저의 아이피주소를 send하고 1을 return한다.
+>조건이 충족되지 못하면 0을 return한다.  
+>예를들면 유저1이 [FILE-user3]을 입력한다면 서버의 SEND_IP()함수에서 1을 return받으면서 user3에게 [FILE-user3]대신 [FILE]메세지가 전송이되고 user1의 ip주소를 전송한다.  
+
+
+
 
   
 
 
 ## 7. client.c 코드 설명
+
+## 8. 실행 결과
+
+## 9. 개선사항
