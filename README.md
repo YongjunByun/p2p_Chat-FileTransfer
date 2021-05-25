@@ -56,13 +56,26 @@ server and client file on Linux
 >조건이 충족되지 못하면 0을 return한다.  
 >예를들면 유저1이 [FILE-user3]을 입력한다면 서버의 SEND_IP()함수에서 1을 return받으면서 user3에게 [FILE-user3]대신 [FILE]메세지가 전송이되고 user1의 ip주소를 전송한다.  
 
-
-
-
-  
-
-
 ## 7. client.c 코드 설명
+>![1](https://user-images.githubusercontent.com/82483513/119443878-43b1bb80-bd65-11eb-9603-a87e4c4797fc.png)  
+>ip주소를 정의하였고, 서버에서 [FILE]메세지를 받을때를 구별할 매크로변수 정의, P2P서버와 클라이언트를 생성할 함수를 선언하였다.  
+>![2](https://user-images.githubusercontent.com/82483513/119443880-457b7f00-bd65-11eb-90e2-71d1e91fb8ae.png)  
+>![3](https://user-images.githubusercontent.com/82483513/119443889-4a403300-bd65-11eb-8e02-fd7544c9ea61.png)  
+>서버와 마찬가지로 fd_set 구조체와 select() 함수를 사용한다. 위의 부분에선 대부분 서버 쪽 코드와 동일하며 서버로 보내주기 위해 먼저 아이디와 패스워드를 키보드를 통해 입력 받은 후, 서버로 보내준다.  
+>![4](https://user-images.githubusercontent.com/82483513/119443890-4b716000-bd65-11eb-867c-f006fd607f49.png)  
+>81라인에서 select함수를 호출하고 메세지를 입력하였을때의 동작과정이다.  
+박스쳐있는 부분이 Project#3에서 핵심이되는 p2p 파일전송을 요청하는 서버를 만드는 과정이다. 만약 입력한 메세지의 9번째 문자까지 “[FILE-user”와 같다면 MAKE_P2PSERVER()함수를 실행시킨다.  
+입력한 메세지가 파일전송을 요청받는 유저의 번호에 따라 1,2,3이 바뀌기에 strncmp()함수를 사용해 그 이전의 문자열인 “[FILE-user”까지만 비교를 진행하였다.  
+>![5](https://user-images.githubusercontent.com/82483513/119443891-4b716000-bd65-11eb-813b-ff92b4f96f1f.png)  
+>![6](https://user-images.githubusercontent.com/82483513/119443892-4c09f680-bd65-11eb-8576-853e273bd883.png)  
+>이부분은 서버로부터 메세지를 받았을때 동작되는 과정이다.  
+>박스쳐진 부분이 입력받은 메세지가 “[FILE]”이라면 클라이언트를 생성하는 과정이다.  
+>일단 [FILE]메세지를 보낸 유저의 IP주소를 원할히 받기위해 1초간 쉬는 sleep()를 사용하고
+IP주소를 받으면 이를 recv_ip변수에 저장한다. 그리고 MAKE_P2PCLIENT()함수를 실행하여
+클라이언트를 생성한다.  
+
+
+ 
 
 ## 8. 실행 결과
 
